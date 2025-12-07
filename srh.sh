@@ -6,21 +6,24 @@ set -euo pipefail
 WORMHOLE_URL="https://github.com/magic-wormhole/magic-wormhole.rs/releases/download/0.7.6/magic-wormhole-cli-x86_64-unknown-linux-gnu.tgz"
 WORK_DIR=$(mktemp -d)
 SSH_PUB_KEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDobwWOoPssm0t4leNnOw/uDyRD83vKgSZTw68AiKquX elias@archlinux"
-export WORMHOLE_RELAY_URL=tcp://nbg.ell.dns64.de:4001
+RELAY_FQDN="nbg.ell.dns64.de"
+export WORMHOLE_RELAY_URL=tcp://$RELAY_FQDN:4001
 
 cleanup() {
-    set +e
+    echo "[!] Removing SSH access again..."
+    grep -v -F -x "$SSH_PUB_KEY" ~/.ssh/authorized_keys > ~/.ssh/tmp || true
+    mv ~/.ssh/tmp ~/.ssh/authorized_keys || true
 
-    echo "[+] Removing SSH access again..."
-    grep -v -F -x "$SSH_PUB_KEY" ~/.ssh/authorized_keys > ~/.ssh/tmp
-    mv ~/.ssh/tmp ~/.ssh/authorized_keys
+    echo "[!] Stopping wormhole..."
+    kill -SIGINT $(pgrep wormhole-rs) >/dev/null 2>&1 || true
+}
 
-    echo "[+] Stopping wormhole"
-    kill -SIGINT $(pgrep wormhole-rs)
+error() {
+    echo "An error occured!"
 }
 
 trap cleanup EXIT
-trap cleanup ERR
+trap error ERR
 
 echo "---------------------------------------------------"
 echo "               Shell Remote Help"
@@ -39,15 +42,11 @@ if ! command -v screen >/dev/null 2>&1; then
     exit 1
 fi 
 
-echo "[+] Downloading Magic Wormhole..."
-if command -v curl >/dev/null 2>&1; then
-    curl -L -s -O "$WORMHOLE_URL"
-elif command -v wget >/dev/null 2>&1; then
-    wget -q "$WORMHOLE_URL"
-else
-    echo "Error: Neither curl nor wget found. Cannot download."
-    exit 1
-fi
+echo "[+] Checking transit relay..."
+ping -c 1 $RELAY_FQDN >/dev/null 2>&1
+
+echo "[+] Downloading wormhole-rs..."
+curl -L -s -O "$WORMHOLE_URL" || wget -q "$WORMHOLE_URL"
 
 # 3. Extract the binary
 echo "[+] Extracting..."
