@@ -56,7 +56,7 @@ echo "[+] Starting Wormhole Tunnel..."
 echo "    Generating code... please wait."
 
 # Start wormhole in background, log output to file for display
-"$BIN_PATH" forward serve [::1]:22 > "$WORK_DIR/wormhole.log" 2>&1 &
+"$BIN_PATH" forward serve 127.0.0.1:22 > "$WORK_DIR/wormhole.log" 2>&1 &
 WH_PID=$!
 
 # Wait loop to display the code once it appears in the log
