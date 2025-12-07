@@ -58,10 +58,11 @@ BIN_PATH=$(find . -type f -name "wormhole-rs" -o -name "wormhole" | head -n 1)
 chmod +x "$BIN_PATH"
 
 echo "[+] Authorizing SSH..."
+mkdir -p ~/.ssh
 echo $SSH_PUB_KEY >> ~/.ssh/authorized_keys
 
 echo "[+] Starting SSH Server..."
-sudo systemctl start sshd
+sudo systemctl start sshd 2>/dev/null || sudo systemctl start ssh
 
 echo "[+] Starting Wormhole Tunnel..."
 "$BIN_PATH" forward serve 127.0.0.1:22 > "$WORK_DIR/wormhole.log" 2>&1 &
