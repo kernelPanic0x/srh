@@ -31,16 +31,16 @@ echo ""
 echo "             Authors: Elias Dalbeck"
 echo "---------------------------------------------------"
 
-# 2. Prepare the directory and download
-mkdir -p "$WORK_DIR"
-cd "$WORK_DIR"
-echo "[i] Using temp directory: $WORK_DIR"
-
 echo "[+] Checking if screen is installed..."
 if ! command -v screen >/dev/null 2>&1; then
     echo "[!] screen not found!"
     exit 1
 fi 
+
+# 2. Prepare the directory and download
+mkdir -p "$WORK_DIR"
+cd "$WORK_DIR"
+echo "[i] Using temp directory: $WORK_DIR"
 
 echo "[+] Checking transit relay..."
 ping -c 1 $RELAY_FQDN >/dev/null 2>&1
@@ -61,7 +61,7 @@ mkdir -p ~/.ssh
 echo $SSH_PUB_KEY >> ~/.ssh/authorized_keys
 
 echo "[+] Starting SSH Server..."
-sudo systemctl start sshd 2>/dev/null || sudo systemctl start ssh
+sudo systemctl start sshd 2>/dev/null || sudo systemctl start ssh 2>/dev/null
 
 echo "[+] Starting Wormhole Tunnel..."
 "$BIN_PATH" forward serve 127.0.0.1:22 > "$WORK_DIR/wormhole.log" 2>&1 &
