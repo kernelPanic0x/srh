@@ -25,7 +25,7 @@ fi
 # 1. Define the specific version of magic-wormhole-rs
 WORMHOLE_URL="https://github.com/magic-wormhole/magic-wormhole.rs/releases/download/0.7.6/magic-wormhole-cli-x86_64-unknown-linux-gnu.tgz"
 WORK_DIR=$(mktemp -d)
-SSH_PUB_KEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKCm/W2YqNHxK4Cxa/WM5vALCZQaVGojrFLUWoctj9I2 elias@archlinux"
+SSH_PUB_KEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIziMsLm7/0XKmq6z4mFqpmdJ/05Kblt92TZHI0IlXvB shell_remote_help"
 RELAY_FQDN="nbg.ell.dns64.de"
 export WORMHOLE_RELAY_URL=tcp://$RELAY_FQDN:4001
 
