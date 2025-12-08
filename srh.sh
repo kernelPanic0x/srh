@@ -25,7 +25,7 @@ fi
 # 1. Define the specific version of magic-wormhole-rs
 WORMHOLE_URL="https://github.com/magic-wormhole/magic-wormhole.rs/releases/download/0.7.6/magic-wormhole-cli-x86_64-unknown-linux-gnu.tgz"
 WORK_DIR=$(mktemp -d)
-SSH_PUB_KEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDobwWOoPssm0t4leNnOw/uDyRD83vKgSZTw68AiKquX elias@archlinux"
+SSH_PUB_KEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKCm/W2YqNHxK4Cxa/WM5vALCZQaVGojrFLUWoctj9I2 elias@archlinux"
 RELAY_FQDN="nbg.ell.dns64.de"
 export WORMHOLE_RELAY_URL=tcp://$RELAY_FQDN:4001
 
@@ -58,10 +58,10 @@ if ! command -v screen >/dev/null 2>&1; then
 fi 
 echo "${GREEN}Ok${RESET}"
 
-# 2. Prepare the directory and download
+echo -n "[+] Creating temp directory..."
 mkdir -p "$WORK_DIR"
 cd "$WORK_DIR"
-echo "[i] Using temp directory: $WORK_DIR"
+echo "${GREEN}Ok${RESET}"
 
 echo -n "[+] Checking transit relay..."
 ping -c 1 $RELAY_FQDN >/dev/null 2>&1
