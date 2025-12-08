@@ -2,6 +2,26 @@
 
 set -euo pipefail
 
+# Check if stdout is a terminal AND if the terminal supports at least 8 colors
+if [ -t 1 ] && command -v tput >/dev/null && [ $(tput colors) -ge 8 ]; then
+    RED=$'\e[31m'
+    GREEN=$'\e[32m'
+    YELLOW=$'\e[33m'
+    BLUE=$'\e[34m'
+    CYAN=$'\e[36m'
+    BOLD=$'\e[1m'
+    RESET=$'\e[0m'
+else
+    # If not a terminal or no color support, set variables to empty strings
+    RED=''
+    GREEN=''
+    YELLOW=''
+    BLUE=''
+    CYAN=''
+    BOLD=''
+    RESET=''
+fi
+
 # 1. Define the specific version of magic-wormhole-rs
 WORMHOLE_URL="https://github.com/magic-wormhole/magic-wormhole.rs/releases/download/0.7.6/magic-wormhole-cli-x86_64-unknown-linux-gnu.tgz"
 WORK_DIR=$(mktemp -d)
@@ -19,57 +39,60 @@ cleanup() {
 }
 
 error() {
-    echo "An error occured!"
+    echo "${RED}${BOLD}An error occured!${RESET}"
 }
 
 trap cleanup EXIT
 trap error ERR
 
-echo "---------------------------------------------------"
-echo "               Shell Remote Help"
+echo "${BLUE}---------------------------------------------------${RESET}"
+echo "${BOLD}               Shell Remote Help${RESET}"
 echo ""
 echo "             Authors: Elias Dalbeck"
-echo "---------------------------------------------------"
+echo "${BLUE}---------------------------------------------------${RESET}"
 
-echo "[+] Checking if screen is installed..."
+echo -n "[+] Checking if screen is installed..."
 if ! command -v screen >/dev/null 2>&1; then
-    echo "[!] screen not found!"
+    echo "${RED}[!] screen not found!${RESET}"
     exit 1
 fi 
+echo "${GREEN}Ok${RESET}"
 
 # 2. Prepare the directory and download
 mkdir -p "$WORK_DIR"
 cd "$WORK_DIR"
 echo "[i] Using temp directory: $WORK_DIR"
 
-echo "[+] Checking transit relay..."
+echo -n "[+] Checking transit relay..."
 ping -c 1 $RELAY_FQDN >/dev/null 2>&1
+echo "${GREEN}Ok${RESET}"
 
-echo "[+] Downloading wormhole-rs..."
+echo -n "[+] Downloading wormhole-rs..."
 curl -L -s -O "$WORMHOLE_URL" || wget -q "$WORMHOLE_URL"
+echo "${GREEN}Ok${RESET}"
 
 # 3. Extract the binary
-echo "[+] Extracting..."
+echo -n "[+] Extracting..."
 tar -xzf magic-wormhole-cli-x86_64-unknown-linux-gnu.tgz
-
-# Find the binary (it might be in a subdir or named differently)
 BIN_PATH=$(find . -type f -name "wormhole-rs" -o -name "wormhole" | head -n 1)
 chmod +x "$BIN_PATH"
+echo "${GREEN}Ok${RESET}"
 
-echo "[+] Authorizing SSH..."
+echo -n "[+] Authorizing SSH..."
 mkdir -p ~/.ssh
 echo $SSH_PUB_KEY >> ~/.ssh/authorized_keys
+echo "${GREEN}Ok${RESET}"
 
-echo "[+] Starting SSH Server..."
+echo -n "[+] Starting SSH Server..."
 sudo systemctl start sshd 2>/dev/null || sudo systemctl start ssh 2>/dev/null
+echo "${GREEN}Ok${RESET}"
 
-echo "[+] Starting Wormhole Tunnel..."
+echo -n "[+] Starting wormhole tunnel..."
 "$BIN_PATH" forward serve 127.0.0.1:22 > "$WORK_DIR/wormhole.log" 2>&1 &
 WH_PID=$!
+echo "${GREEN}Ok${RESET}"
 
-echo "    Generating code... please wait."
-
-# Wait loop to display the code once it appears in the log
+echo -n "[+] Generating wormhole code..."
 COUNT=0
 while [ $COUNT -lt 10 ]; do
     if grep -q "code is:" "$WORK_DIR/wormhole.log"; then
@@ -77,19 +100,22 @@ while [ $COUNT -lt 10 ]; do
     fi
     
     sleep 1
-    COUNT=$((COUNT++))
+    COUNT=$((COUNT+1))
 done
+WORMHOLE_CODE=$(grep -o "[0-9]\+-[^ ]\+" "$WORK_DIR/wormhole.log" | head -n 1)
+echo "${GREEN}Ok${RESET}"
 
 echo ""
-echo "###################################################"
-echo "        YOUR SHARED SESSION CODE IS BELOW"
-echo "###################################################"
+echo "${CYAN}###################################################${RESET}"
+echo "${BOLD}        YOUR SHARED SESSION CODE IS BELOW${RESET}"
+echo "${CYAN}###################################################${RESET}"
 echo ""
-# Display the code cleanly
-grep "code is:" "$WORK_DIR/wormhole.log" -A 1 
+echo "Code is: ${YELLOW}${BOLD}${WORMHOLE_CODE}${RESET}"
 echo ""
-echo ">>> Your Username: $(whoami) <<<"
+echo "Username is: ${BOLD}$(whoami)${RESET}"
+echo ""
 read -p "Press [Enter] when ready..."
 
-echo "[+] Starting shared screen session..."
+echo -n "[+] Starting shared screen session..."
 screen -q -S help
+echo "${GREEN}Ok${RESET}"
