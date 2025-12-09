@@ -65,8 +65,6 @@ cat << 'EOF' > "$WORK_DIR/.screenrc"
 truecolor on
 hardstatus alwaysfirstline
 hardstatus string '%{= 0;5}%= Shared Shell Session %{= 0;5}%= %c'
-term xterm-256color
-termcapinfo * "Ms=\E]52;%p1%s;%p2%s\007:XT"
 EOF
 echo "${GREEN}Ok${RESET}"
 
