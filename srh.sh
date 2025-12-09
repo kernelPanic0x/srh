@@ -63,8 +63,15 @@ mkdir -p "$WORK_DIR"
 cd "$WORK_DIR"
 cat << 'EOF' > "$WORK_DIR/.screenrc"
 truecolor on
+
 hardstatus alwaysfirstline
 hardstatus string '%{= 0;5}%= Shared Shell Session %{= 0;5}%= %c'
+
+# Correct terminal type for inside screen
+term screen-256color
+
+# Enable OSC 52 (clipboard) passthrough for xterm/screen outer terminals
+termcapinfo xterm*|screen* "Ms=\E]52;%p1%s;%p2%s\007"
 EOF
 echo "${GREEN}Ok${RESET}"
 
