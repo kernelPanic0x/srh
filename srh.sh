@@ -61,12 +61,13 @@ echo "${GREEN}Ok${RESET}"
 echo -n "[+] Creating temp directory..."
 mkdir -p "$WORK_DIR"
 cd "$WORK_DIR"
-cat << 'EOF' > "$WORK_DIR/.screenrc"
+cat << EOF > "$WORK_DIR/.screenrc"
 truecolor on
 hardstatus alwaysfirstline
 hardstatus string '%{= 0;5}%= Shared Shell Session %{= 0;5}%= %c'
+setenv PATH $WORK_DIR:$PATH
 EOF
-cat << 'EOF' | base64 -d > "$WORK_DIR/osc52.sh"
+cat << EOF | base64 -d > "$WORK_DIR/osc52.sh"
 IyEvYmluL3NoCiMgQ29weXJpZ2h0IChjKSAyMDEyIFRoZSBDaHJvbWl1bSBPUyBBdXRob3JzLiBB
 bGwgcmlnaHRzIHJlc2VydmVkLgojIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVk
 IGJ5IGEgQlNELXN0eWxlIGxpY2Vuc2UgdGhhdCBjYW4gYmUKIyBmb3VuZCBpbiB0aGUgTElDRU5T
