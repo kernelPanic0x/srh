@@ -118,5 +118,5 @@ echo ""
 read -p "Press [Enter] when ready..."
 
 echo -n "[+] Starting shared screen session..."
-screen -q -c $WORK_DIR/.screenrc -RR -S help
+screen -q -c "$WORK_DIR/.screenrc" -RR -S help
 echo "${GREEN}Ok${RESET}"
