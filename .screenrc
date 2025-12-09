@@ -1,3 +1,4 @@
 truecolor on
 hardstatus alwaysfirstline
-hardstatus string '%{= 0;5}%= Shared Shell Session %{= 0;5}%= %: %c'
+hardstatus string '%{= 0;5}%= Shared Shell Session %{= 0;5}%= %c'
+
