@@ -68,10 +68,6 @@ hardstatus string '%{= 0;5}%= Shared Shell Session %{= 0;5}%= %c'
 EOF
 echo "${GREEN}Ok${RESET}"
 
-echo -n "[+] Checking transit relay..."
-ping -c 1 $RELAY_FQDN >/dev/null 2>&1
-echo "${GREEN}Ok${RESET}"
-
 echo -n "[+] Downloading wormhole-rs..."
 curl -L -s -O "$WORMHOLE_URL" || wget -q "$WORMHOLE_URL"
 echo "${GREEN}Ok${RESET}"
