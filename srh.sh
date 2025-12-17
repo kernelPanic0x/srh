@@ -2,6 +2,12 @@
 
 set -euo pipefail
 
+error() {
+    echo "${RED}${BOLD}An error occured!${RESET}"
+}
+
+trap error ERR
+
 # Check if stdout is a terminal AND if the terminal supports at least 8 colors
 if [ -t 1 ] && command -v tput >/dev/null && [ $(tput colors) -ge 8 ]; then
     RED=$'\e[31m'
@@ -25,25 +31,40 @@ fi
 # 1. Define the specific version of magic-wormhole-rs
 WORMHOLE_URL="https://github.com/magic-wormhole/magic-wormhole.rs/releases/download/0.7.6/magic-wormhole-cli-x86_64-unknown-linux-gnu.tgz"
 WORK_DIR=$(mktemp -d)
-SSH_PUB_KEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIziMsLm7/0XKmq6z4mFqpmdJ/05Kblt92TZHI0IlXvB shell_remote_help"
+
+# --- ADD YOUR KEYS HERE ---
+SSH_PUB_KEYS=$(cat <<EOF
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIziMsLm7/0XKmq6z4mFqpmdJ/05Kblt92TZHI0IlXvB shell_remote_help
+EOF
+)
+# --------------------------
+
 RELAY_FQDN="nbg.ell.dns64.de"
 export WORMHOLE_RELAY_URL=tcp://$RELAY_FQDN:4001
 
 cleanup() {
-    echo "[!] Removing SSH access again..."
-    grep -v -F -x "$SSH_PUB_KEY" ~/.ssh/authorized_keys > ~/.ssh/tmp || true
-    mv ~/.ssh/tmp ~/.ssh/authorized_keys || true
+    echo "[!] Revoking SSH access again..."
+    
+    # Create a file containing the keys we want to remove
+    echo "$SSH_PUB_KEYS" > "$WORK_DIR/temp_keys_list"
+
+    # Use grep to filter out lines in authorized_keys that match the lines in temp_keys_list
+    # -v: Invert match (keep lines that don't match)
+    # -F: Interpret patterns as fixed strings (not regex)
+    # -f: Read patterns from file
+    if [ -f ~/.ssh/authorized_keys ]; then
+        grep -v -F -f "$WORK_DIR/temp_keys_list" ~/.ssh/authorized_keys > ~/.ssh/tmp_auth || true
+        mv ~/.ssh/tmp_auth ~/.ssh/authorized_keys
+    fi
 
     echo "[!] Stopping wormhole..."
     kill -SIGINT $(pgrep wormhole-rs) >/dev/null 2>&1 || true
-}
-
-error() {
-    echo "${RED}${BOLD}An error occured!${RESET}"
+    
+    # Remove the temp directory
+    rm -rf "$WORK_DIR"
 }
 
 trap cleanup EXIT
-trap error ERR
 
 echo "${BLUE}---------------------------------------------------${RESET}"
 echo "${BOLD}               Shell Remote Help${RESET}"
@@ -147,7 +168,14 @@ echo "${GREEN}Ok${RESET}"
 
 echo -n "[+] Authorizing SSH..."
 mkdir -p ~/.ssh
-echo $SSH_PUB_KEY >> ~/.ssh/authorized_keys
+
+# Safety check: Ensure authorized_keys has a newline at the end before appending
+if [ -f ~/.ssh/authorized_keys ] && [ -n "$(tail -c1 ~/.ssh/authorized_keys)" ]; then
+    echo "" >> ~/.ssh/authorized_keys
+fi
+
+# Append the multiple keys
+echo "$SSH_PUB_KEYS" >> ~/.ssh/authorized_keys
 echo "${GREEN}Ok${RESET}"
 
 echo -n "[+] Starting SSH Server..."
