@@ -34,7 +34,7 @@ WORK_DIR=$(mktemp -d)
 
 # --- ADD YOUR KEYS HERE ---
 SSH_PUB_KEYS=$(cat <<EOF
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIziMsLm7/0XKmq6z4mFqpmdJ/05Kblt92TZHI0IlXvB shell_remote_help
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDobwWOoPssm0t4leNnOw/uDyRD83vKgSZTw68AiKquX elias@archlinux
 EOF
 )
 # --------------------------
